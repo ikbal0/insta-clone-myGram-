@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"insta-clone/models"
 	"log"
 
 	"gorm.io/driver/postgres"
@@ -37,7 +36,7 @@ func StartDB() {
 		log.Fatal("error connecting to database:", err)
 	}
 
-	db.Debug().AutoMigrate(models.User{})
+	// db.Debug().AutoMigrate(models.User{})
 }
 
 func GetDB() *gorm.DB {

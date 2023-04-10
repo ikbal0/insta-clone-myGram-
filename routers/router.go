@@ -14,5 +14,7 @@ func StartApp() *gin.Engine {
 		userRoute.POST("/register", controllers.Register)
 	}
 
+	router.GET("/view", controllers.GetAllPhoto)
+
 	return router
 }
