@@ -14,7 +14,11 @@ func StartApp() *gin.Engine {
 		userRoute.POST("/register", controllers.Register)
 	}
 
-	router.GET("/view", controllers.GetAllPhoto)
+	router.GET("/test", controllers.GetAllPhoto)
+	router.POST("/test", controllers.PostTest)
+
+	router.MaxMultipartMemory = 8 << 20
+	router.POST("/photo", controllers.UploadFile)
 
 	return router
 }
