@@ -3,150 +3,209 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"insta-clone/database"
 	"insta-clone/helpers"
-	"io/ioutil"
-	"log"
+	"insta-clone/models"
+	"io"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-type Chart struct {
-	Name  string `json:"name" form:"name"`
-	Icon  string `json:"icon" form:"icon"`
-	Price int    `json:"price" form:"price"`
-	Total int    `json:"total" form:"total"`
-	Type  string `json:"type" form:"type"`
-	Qty   int    `json:"qty" form:"qty"`
-}
+func DeleteImage(ctx *gin.Context) {
+	db := database.GetDB()
+	PhotoDelete := models.Photo{}
+	photoId, _ := strconv.Atoi(ctx.Param("photoId"))
 
-func PostTest(ctx *gin.Context) {
+	err := db.First(&PhotoDelete, "Id = ?", photoId).Error
 
-	contentType := helpers.GetContentType(ctx)
-	Chart := Chart{}
-
-	if contentType == appJson {
-		ctx.ShouldBindJSON(&Chart)
-	} else {
-		ctx.ShouldBind(&Chart)
-	}
-
-	data := map[string]interface{}{
-		"name":  Chart.Name,
-		"icon":  Chart.Icon,
-		"price": Chart.Price,
-		"total": Chart.Total,
-		"type":  Chart.Type,
-		"qty":   Chart.Qty,
-	}
-
-	requestJson, err := json.Marshal(data)
-	client := &http.Client{}
+	imageId := strconv.Itoa(int(PhotoDelete.ImageID))
 
 	if err != nil {
-		log.Fatalln(err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "record has not found!"})
+		return
 	}
 
-	req, err := http.NewRequest("POST", "http://localhost:3000/create/cart", bytes.NewBuffer(requestJson))
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
 
-	req.Header.Set("Content-Type", "application/json")
+	req, err := http.NewRequest(http.MethodDelete, "http://localhost:3000/image/"+imageId, nil)
 
 	if err != nil {
-		log.Fatalln(err)
-	}
-
-	res, err := client.Do(req)
-
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	defer res.Body.Close()
-
-	body, err := ioutil.ReadAll(res.Body)
-
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	log.Println("body:", string(body))
-
-	type Response struct {
-		Status bool `json:"status"`
-	}
-
-	var responseObject Response
-
-	json.Unmarshal(body, &responseObject)
-
-	if !responseObject.Status {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid input",
+			"error":   "Bad Request 4",
+			"message": err.Error(),
 		})
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{
-		"body": responseObject,
+	rsp, err := client.Do(req)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "get rsp",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	defer rsp.Body.Close()
+
+	resBody, err := io.ReadAll(rsp.Body)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "io read all",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	errDelete := db.Debug().Delete(&PhotoDelete).Error
+
+	if errDelete != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "delete fail",
+			"message": err.Error(),
+		})
+		return
+	}
+	// fmt.Println("body:", string(resBody))
+
+	if rsp.StatusCode != http.StatusOK {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Status code",
+			"message": fmt.Sprintf("Request failed with response code: %d", rsp.StatusCode),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusBadRequest, gin.H{
+		"message": "delete success!",
+		"resp":    string(resBody),
 	})
-	// fmt.Println("chart bind:", Chart)
-	// fmt.Println("json marshal:", requestJson)
 }
 
-func GetAllPhoto(ctx *gin.Context) {
-	res, err := http.Get("https://server-image.up.railway.app/view")
+func UploadFile(ctx *gin.Context) {
+	db := database.GetDB()
+	fileIn, err := ctx.FormFile("file")
+	caption := ctx.PostForm("caption")
+	title := ctx.PostForm("title")
 
 	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Bad Request 1",
+			"message": err.Error(),
+		})
+	}
+
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	timeStamp := helpers.MakeTimeStamp()
+	newName := strconv.Itoa(int(timeStamp)) + fileIn.Filename
+
+	writer.CreateFormFile("file", fileIn.Filename)
+	writer.WriteField("userId", "1")
+	writer.WriteField("name", newName)
+
+	f, err := os.CreateTemp("", fileIn.Filename)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Bad Request 2",
+			"message": err.Error(),
+		})
+	}
+
+	writer.Close()
+
+	defer f.Close()
+
+	req, err := http.NewRequest("POST", "http://localhost:3000/image", bytes.NewReader(body.Bytes()))
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Bad Request 4",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	rsp, err := client.Do(req)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "get rsp",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	defer rsp.Body.Close()
+
+	resBody, err := io.ReadAll(rsp.Body)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "io read all",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	fmt.Println("body:", string(resBody))
+
+	if rsp.StatusCode != http.StatusOK {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Bad Request 5",
+			"message": fmt.Sprintf("Request failed with response code: %d", rsp.StatusCode),
+		})
+		return
+	}
+
+	type Image struct {
+		ImageID  uint   `json:"image_id"`
+		UserID   uint   `json:"user_id"`
+		ImageUrl string `json:"image_url"`
+	}
+
+	var responseObj Image
+	photo := models.Photo{}
+
+	json.Unmarshal(resBody, &responseObj)
+
+	photo.Caption = caption
+	photo.Title = title
+	photo.PhotoUrl = responseObj.ImageUrl
+	photo.UserID = responseObj.UserID
+	photo.ImageID = responseObj.ImageID
+
+	errCreate := db.Debug().Create(&photo).Error
+
+	if errCreate != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Bad Request",
 			"message": err.Error(),
 		})
-
 		return
 	}
 
-	// fmt.Println(res.Body)
-
-	body, err := ioutil.ReadAll(res.Body)
-
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
-			"message": err.Error(),
-		})
-
-		return
-	}
-
-	defer res.Body.Close()
-
-	// sb := string(body)
-
-	type File struct {
-		ID   string `json:"_id"`
-		Name string `json:"name"`
-	}
-
-	type Product struct {
-		ID   string `json:"_id"`
-		Name string `json:"name"`
-	}
-
-	type DataPool struct {
-		Files    []File    `json:"file"`
-		Products []Product `json:"product"`
-	}
-
-	type Response struct {
-		Status bool     `json:"status"`
-		Data   DataPool `json:"data"`
-	}
-
-	var responseObject Response
-
-	json.Unmarshal(body, &responseObject)
-
-	ctx.JSON(http.StatusCreated, gin.H{
-		"file": responseObject.Data.Files,
+	ctx.JSON(http.StatusBadRequest, gin.H{
+		"message":           "file sended",
+		"image server resp": responseObj,
+		"photo":             photo,
 	})
 }
