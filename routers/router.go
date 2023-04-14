@@ -14,6 +14,15 @@ func StartApp() *gin.Engine {
 		userRoute.POST("/register", controllers.Register)
 	}
 
+	socialMediaRoute := router.Group("/social-media")
+	{
+		socialMediaRoute.POST("/", controllers.PostSocialMed)
+		socialMediaRoute.GET("/", controllers.GetAllSocialMed)
+		socialMediaRoute.GET("/:id", controllers.GetOneSocialMed)
+		socialMediaRoute.PATCH("/:id", controllers.UpdateSocialMed)
+		socialMediaRoute.DELETE("/:id", controllers.DeleteSocialMed)
+	}
+
 	// router.GET("/test", controllers.GetAllPhoto)
 	// router.POST("/test", controllers.PostTest)
 
