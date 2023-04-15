@@ -7,4 +7,5 @@ type Photo struct {
 	PhotoUrl string `gorm:"not null" json:"photo_url" form:"photo_url" valid:"required~photo url can't empty!"`
 	UserID   uint
 	ImageID  uint
+	Comments []Comment
 }

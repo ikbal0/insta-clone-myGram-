@@ -1,16 +1,18 @@
 package middleware
 
 import (
+	"fmt"
 	"insta-clone/database"
 	"insta-clone/models"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func SocialMedAuthorization() gin.HandlerFunc {
+	fmt.Println("social media Author")
 	return func(ctx *gin.Context) {
 		db := database.GetDB()
 		SocialMedId, err := strconv.Atoi(ctx.Param("id"))

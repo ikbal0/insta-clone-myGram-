@@ -132,7 +132,7 @@ func GetAllPhoto(ctx *gin.Context) {
 
 	var photo []models.Photo
 
-	err := db.Find(&photo).Error
+	err := db.Preload("Comments").Find(&photo).Error
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{

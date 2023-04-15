@@ -97,7 +97,7 @@ func PostComment(ctx *gin.Context) {
 	}
 
 	Comment.UserID = 1
-	Comment.PhotoID = 3
+	Comment.PhotoID = 13
 
 	err := db.Debug().Create(&Comment).Error
 
@@ -111,7 +111,7 @@ func PostComment(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, gin.H{
-		"message": "Post Social Med",
+		"message": "Comment posted",
 		"data":    Comment,
 	})
 }
