@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func DeleteSocialMed(c *gin.Context) {
@@ -85,6 +86,8 @@ func GetAllSocialMed(ctx *gin.Context) {
 }
 
 func PostSocialMed(ctx *gin.Context) {
+	userData := ctx.MustGet("userData").(jwt.MapClaims)
+	userID := uint(userData["id"].(float64))
 	db := database.GetDB()
 	contentType := helpers.GetContentType(ctx)
 	_, _ = db, contentType
@@ -96,7 +99,7 @@ func PostSocialMed(ctx *gin.Context) {
 		ctx.ShouldBind(&SocialMedia)
 	}
 
-	SocialMedia.UserID = 1
+	SocialMedia.UserID = userID
 
 	err := db.Debug().Create(&SocialMedia).Error
 

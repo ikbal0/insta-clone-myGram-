@@ -39,7 +39,8 @@ func StartDB() {
 	// db.Debug().AutoMigrate(
 	// models.User{},
 	// models.Photo{},
-	// 	models.SocialMedia{},
+	// models.SocialMedia{},
+	// 	models.Comment{},
 	// )
 }
 

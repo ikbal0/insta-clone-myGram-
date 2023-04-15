@@ -15,7 +15,151 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
+
+func UpdatePhoto(ctx *gin.Context) {
+	var db = database.GetDB()
+	var photo models.Photo
+	var input models.Photo
+	err := db.First(&photo, "Id = ?", ctx.Param("photoId")).Error
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "record has not found!"})
+		return
+	}
+
+	fileIn, err := ctx.FormFile("file")
+	if err != nil {
+		ctx.ShouldBindJSON(&input)
+
+		db.Model(&photo).Updates(&input)
+
+		ctx.JSON(http.StatusOK, gin.H{"data": photo})
+		return
+	}
+
+	// save file to temp folder
+	if err := ctx.SaveUploadedFile(fileIn, "temp/tempFile"+fileIn.Filename); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"message": "Unable to save file",
+		})
+		return
+	}
+
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	// New multipart writer.
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	fw, err := writer.CreateFormFile("file", "temp/tempFile"+fileIn.Filename)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Error create form file",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	file, err := os.Open("temp/tempFile" + fileIn.Filename)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Error Open file",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	_, err = io.Copy(fw, file)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Error Copy",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	writer.Close()
+
+	req, err := http.NewRequest("PATCH", "http://localhost:3000/image", bytes.NewReader(body.Bytes()))
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Bad Request",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	rsp, _ := client.Do(req)
+
+	if rsp.StatusCode != http.StatusOK {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Bad Request",
+			"message": fmt.Sprintf("Request failed with response code: %d", rsp.StatusCode),
+		})
+		// return
+	}
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "io read all",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ctx.ShouldBindJSON(&input)
+	db.Model(&photo).Updates(&input)
+
+	ctx.JSON(http.StatusCreated, gin.H{
+		"message": "file sended",
+		"photo":   photo,
+	})
+
+	file.Close()
+
+	// delete temporary file
+	path := "temp/tempFile" + fileIn.Filename
+	defer helpers.DeleteTempFile(path, ctx)
+}
+
+func GetAllPhoto(ctx *gin.Context) {
+	var db = database.GetDB()
+
+	var photo []models.Photo
+
+	err := db.Find(&photo).Error
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "err get Request",
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"data": photo})
+}
+
+func GetOnePhoto(ctx *gin.Context) {
+	var db = database.GetDB()
+
+	var photo []models.Photo
+
+	err := db.First(&photo, "Id = ?", ctx.Param("photoId")).Error
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "record has not found!"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"data one": photo})
+}
 
 func DeleteImage(ctx *gin.Context) {
 	db := database.GetDB()
@@ -93,68 +237,87 @@ func DeleteImage(ctx *gin.Context) {
 }
 
 func UploadFile(ctx *gin.Context) {
+	userData := ctx.MustGet("userData").(jwt.MapClaims)
+	userID := uint(userData["id"].(float64))
 	db := database.GetDB()
-	fileIn, err := ctx.FormFile("file")
+
+	// getting form post
 	caption := ctx.PostForm("caption")
 	title := ctx.PostForm("title")
-
+	// getting file form user input
+	fileIn, err := ctx.FormFile("file")
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request 1",
-			"message": err.Error(),
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": "No File is received",
+			"err":     err.Error(),
 		})
+		return
+	}
+	// save file to temp folder
+	if err := ctx.SaveUploadedFile(fileIn, "temp/tempFile"+fileIn.Filename); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"message": "Unable to save file",
+		})
+		return
 	}
 
 	client := &http.Client{
 		Timeout: time.Second * 10,
 	}
 
+	// New multipart writer.
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
-
-	timeStamp := helpers.MakeTimeStamp()
-	newName := strconv.Itoa(int(timeStamp)) + fileIn.Filename
-
-	writer.CreateFormFile("file", fileIn.Filename)
-	writer.WriteField("userId", "1")
-	writer.WriteField("name", newName)
-
-	f, err := os.CreateTemp("", fileIn.Filename)
-
+	writer.WriteField("userId", strconv.Itoa(int(userID)))
+	fw, err := writer.CreateFormFile("file", "temp/tempFile"+fileIn.Filename)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request 2",
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Error create form file",
 			"message": err.Error(),
 		})
+		return
+	}
+
+	file, err := os.Open("temp/tempFile" + fileIn.Filename)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Error Open file",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	_, err = io.Copy(fw, file)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Error Copy",
+			"message": err.Error(),
+		})
+		return
 	}
 
 	writer.Close()
-
-	defer f.Close()
 
 	req, err := http.NewRequest("POST", "http://localhost:3000/image", bytes.NewReader(body.Bytes()))
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request 4",
+			"error":   "Bad Request",
 			"message": err.Error(),
 		})
 		return
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
+	rsp, _ := client.Do(req)
 
-	rsp, err := client.Do(req)
-
-	if err != nil {
+	if rsp.StatusCode != http.StatusOK {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error":   "get rsp",
-			"message": err.Error(),
+			"error":   "Bad Request",
+			"message": fmt.Sprintf("Request failed with response code: %d", rsp.StatusCode),
 		})
-		return
+		// return
 	}
-
-	defer rsp.Body.Close()
 
 	resBody, err := io.ReadAll(rsp.Body)
 
@@ -162,16 +325,6 @@ func UploadFile(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error":   "io read all",
 			"message": err.Error(),
-		})
-		return
-	}
-
-	fmt.Println("body:", string(resBody))
-
-	if rsp.StatusCode != http.StatusOK {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request 5",
-			"message": fmt.Sprintf("Request failed with response code: %d", rsp.StatusCode),
 		})
 		return
 	}
@@ -194,7 +347,6 @@ func UploadFile(ctx *gin.Context) {
 	photo.ImageID = responseObj.ImageID
 
 	errCreate := db.Debug().Create(&photo).Error
-
 	if errCreate != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Bad Request",
@@ -203,9 +355,15 @@ func UploadFile(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusBadRequest, gin.H{
+	ctx.JSON(http.StatusCreated, gin.H{
 		"message":           "file sended",
 		"image server resp": responseObj,
 		"photo":             photo,
 	})
+
+	file.Close()
+
+	// delete temporary file
+	path := "temp/tempFile" + fileIn.Filename
+	defer helpers.DeleteTempFile(path, ctx)
 }

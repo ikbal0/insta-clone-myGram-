@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"insta-clone/helpers"
 
 	"github.com/asaskevich/govalidator"
 	"gorm.io/gorm"
@@ -26,6 +27,8 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	if u.Age < 9 {
 		return errors.New("come back when u at least 9 years old")
 	}
+
+	u.Password = helpers.HashPass(u.Password)
 
 	err = nil
 	return
