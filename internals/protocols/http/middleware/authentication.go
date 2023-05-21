@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"insta-clone/helpers"
+	"insta-clone/internals/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -9,7 +9,7 @@ import (
 
 func Authentication() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		verifyToken, err := helpers.VerifyToken(ctx)
+		verifyToken, err := utils.VerifyToken(ctx)
 		_ = verifyToken
 
 		if err != nil {

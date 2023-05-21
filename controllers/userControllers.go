@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"insta-clone/database"
-	"insta-clone/helpers"
-	"insta-clone/models"
+	"insta-clone/internals/utils"
+	"insta-clone/src/modules/user/entities"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,9 +15,9 @@ var (
 
 func Login(c *gin.Context) {
 	db := database.GetDB()
-	contentType := helpers.GetContentType(c)
+	contentType := utils.GetContentType(c)
 	_, _ = db, contentType
-	User := models.User{}
+	User := entities.User{}
 	password := ""
 
 	if contentType == appJson {
@@ -37,7 +37,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	comparePass := helpers.ComparePass([]byte(User.Password), []byte(password))
+	comparePass := utils.ComparePass([]byte(User.Password), []byte(password))
 
 	if !comparePass {
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -47,7 +47,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token := helpers.TokenGenerator(User.ID, User.Email)
+	token := utils.TokenGenerator(User.ID, User.Email)
 
 	c.JSON(http.StatusOK, gin.H{
 		"token": token,
@@ -56,9 +56,9 @@ func Login(c *gin.Context) {
 
 func Register(ctx *gin.Context) {
 	db := database.GetDB()
-	contentType := helpers.GetContentType(ctx)
+	contentType := utils.GetContentType(ctx)
 	_, _ = db, contentType
-	User := models.User{}
+	User := entities.User{}
 
 	if contentType == appJson {
 		ctx.ShouldBindJSON(&User)

@@ -3,7 +3,7 @@ package middleware
 import (
 	"fmt"
 	"insta-clone/database"
-	"insta-clone/models"
+	"insta-clone/src/modules/social_media/entities"
 	"net/http"
 	"strconv"
 
@@ -25,7 +25,7 @@ func SocialMedAuthorization() gin.HandlerFunc {
 		}
 		userData := ctx.MustGet("userData").(jwt.MapClaims)
 		userID := uint(userData["id"].(float64))
-		SocialMedia := models.SocialMedia{}
+		SocialMedia := entities.SocialMedia{}
 
 		err = db.Select("UserID").First(&SocialMedia, uint(SocialMedId)).Error
 

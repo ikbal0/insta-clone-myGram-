@@ -2,7 +2,7 @@ package main
 
 import (
 	"insta-clone/database"
-	"insta-clone/routers"
+	"insta-clone/internals/protocols/http/routers"
 )
 
 func main() {

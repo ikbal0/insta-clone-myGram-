@@ -1,8 +1,8 @@
-package models
+package entities
 
 import (
 	"errors"
-	"insta-clone/helpers"
+	"insta-clone/internals/utils"
 
 	"github.com/asaskevich/govalidator"
 	"gorm.io/gorm"
@@ -28,7 +28,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 		return errors.New("come back when u at least 9 years old")
 	}
 
-	u.Password = helpers.HashPass(u.Password)
+	u.Password = utils.HashPass(u.Password)
 
 	err = nil
 	return

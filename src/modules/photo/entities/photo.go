@@ -1,4 +1,6 @@
-package models
+package entities
+
+import "insta-clone/src/modules/comment/entities"
 
 type Photo struct {
 	GormModel
@@ -7,5 +9,5 @@ type Photo struct {
 	PhotoUrl string `gorm:"not null" json:"photo_url" form:"photo_url" valid:"required~photo url can't empty!"`
 	UserID   uint
 	ImageID  uint
-	Comments []Comment
+	Comments []entities.Comment
 }

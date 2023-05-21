@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"insta-clone/database"
-	"insta-clone/helpers"
-	"insta-clone/models"
+	"insta-clone/internals/utils"
+	"insta-clone/src/modules/photo/entities"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -20,8 +20,8 @@ import (
 
 func UpdatePhoto(ctx *gin.Context) {
 	var db = database.GetDB()
-	var photo models.Photo
-	var input models.Photo
+	var photo entities.Photo
+	var input entities.Photo
 	err := db.First(&photo, "Id = ?", ctx.Param("photoId")).Error
 
 	if err != nil {
@@ -124,13 +124,13 @@ func UpdatePhoto(ctx *gin.Context) {
 
 	// delete temporary file
 	path := "temp/tempFile" + fileIn.Filename
-	defer helpers.DeleteTempFile(path, ctx)
+	defer utils.DeleteTempFile(path, ctx)
 }
 
 func GetAllPhoto(ctx *gin.Context) {
 	var db = database.GetDB()
 
-	var photo []models.Photo
+	var photo []entities.Photo
 
 	err := db.Preload("Comments").Find(&photo).Error
 
@@ -149,7 +149,7 @@ func GetAllPhoto(ctx *gin.Context) {
 func GetOnePhoto(ctx *gin.Context) {
 	var db = database.GetDB()
 
-	var photo []models.Photo
+	var photo []entities.Photo
 
 	err := db.First(&photo, "Id = ?", ctx.Param("photoId")).Error
 
@@ -163,7 +163,7 @@ func GetOnePhoto(ctx *gin.Context) {
 
 func DeleteImage(ctx *gin.Context) {
 	db := database.GetDB()
-	PhotoDelete := models.Photo{}
+	PhotoDelete := entities.Photo{}
 	photoId, _ := strconv.Atoi(ctx.Param("photoId"))
 
 	err := db.First(&PhotoDelete, "Id = ?", photoId).Error
@@ -336,7 +336,7 @@ func UploadFile(ctx *gin.Context) {
 	}
 
 	var responseObj Image
-	photo := models.Photo{}
+	photo := entities.Photo{}
 
 	json.Unmarshal(resBody, &responseObj)
 
@@ -365,5 +365,5 @@ func UploadFile(ctx *gin.Context) {
 
 	// delete temporary file
 	path := "temp/tempFile" + fileIn.Filename
-	defer helpers.DeleteTempFile(path, ctx)
+	defer utils.DeleteTempFile(path, ctx)
 }

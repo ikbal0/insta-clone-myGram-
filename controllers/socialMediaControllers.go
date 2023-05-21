@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"insta-clone/database"
-	"insta-clone/helpers"
-	"insta-clone/models"
+	"insta-clone/internals/utils"
+	"insta-clone/src/modules/social_media/entities"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +14,7 @@ func DeleteSocialMed(c *gin.Context) {
 	database.StartDB()
 	var db = database.GetDB()
 
-	var socialMedDelete models.SocialMedia
+	var socialMedDelete entities.SocialMedia
 	err := db.First(&socialMedDelete, "Id = ?", c.Param("id")).Error
 
 	if err != nil {
@@ -30,7 +30,7 @@ func DeleteSocialMed(c *gin.Context) {
 func UpdateSocialMed(c *gin.Context) {
 	var db = database.GetDB()
 
-	var socialMed models.SocialMedia
+	var socialMed entities.SocialMedia
 
 	err := db.First(&socialMed, "Id = ?", c.Param("id")).Error
 
@@ -39,7 +39,7 @@ func UpdateSocialMed(c *gin.Context) {
 		return
 	}
 
-	var input models.SocialMedia
+	var input entities.SocialMedia
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -54,7 +54,7 @@ func UpdateSocialMed(c *gin.Context) {
 func GetOneSocialMed(c *gin.Context) {
 	var db = database.GetDB()
 
-	var socialMedOne []models.SocialMedia
+	var socialMedOne []entities.SocialMedia
 
 	err := db.First(&socialMedOne, "Id = ?", c.Param("id")).Error
 
@@ -69,7 +69,7 @@ func GetOneSocialMed(c *gin.Context) {
 func GetAllSocialMed(ctx *gin.Context) {
 	var db = database.GetDB()
 
-	var socialMed []models.SocialMedia
+	var socialMed []entities.SocialMedia
 
 	err := db.Find(&socialMed).Error
 
@@ -89,9 +89,9 @@ func PostSocialMed(ctx *gin.Context) {
 	userData := ctx.MustGet("userData").(jwt.MapClaims)
 	userID := uint(userData["id"].(float64))
 	db := database.GetDB()
-	contentType := helpers.GetContentType(ctx)
+	contentType := utils.GetContentType(ctx)
 	_, _ = db, contentType
-	SocialMedia := models.SocialMedia{}
+	SocialMedia := entities.SocialMedia{}
 
 	if contentType == appJson {
 		ctx.ShouldBindJSON(&SocialMedia)

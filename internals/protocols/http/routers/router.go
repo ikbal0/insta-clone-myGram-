@@ -2,7 +2,7 @@ package routers
 
 import (
 	"insta-clone/controllers"
-	"insta-clone/middleware"
+	"insta-clone/internals/protocols/http/middleware"
 
 	"github.com/gin-gonic/gin"
 )

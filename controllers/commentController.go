@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"insta-clone/database"
-	"insta-clone/helpers"
-	"insta-clone/models"
+	"insta-clone/internals/utils"
+	"insta-clone/src/modules/comment/entities"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +13,7 @@ func DeleteComment(ctx *gin.Context) {
 	database.StartDB()
 	var db = database.GetDB()
 
-	var comment models.Comment
+	var comment entities.Comment
 	err := db.First(&comment, "Id = ?", ctx.Param("id")).Error
 
 	if err != nil {
@@ -29,7 +29,7 @@ func DeleteComment(ctx *gin.Context) {
 func GetOneComment(ctx *gin.Context) {
 	var db = database.GetDB()
 
-	var comment []models.Comment
+	var comment []entities.Comment
 
 	err := db.First(&comment, "Id = ?", ctx.Param("id")).Error
 
@@ -44,7 +44,7 @@ func GetOneComment(ctx *gin.Context) {
 func GetAllComment(ctx *gin.Context) {
 	var db = database.GetDB()
 
-	var comment []models.Comment
+	var comment []entities.Comment
 
 	err := db.Find(&comment).Error
 
@@ -63,7 +63,7 @@ func GetAllComment(ctx *gin.Context) {
 func UpdateComment(ctx *gin.Context) {
 	var db = database.GetDB()
 
-	var comment models.Comment
+	var comment entities.Comment
 
 	err := db.First(&comment, "Id = ?", ctx.Param("id")).Error
 
@@ -72,7 +72,7 @@ func UpdateComment(ctx *gin.Context) {
 		return
 	}
 
-	var input models.Comment
+	var input entities.Comment
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -86,9 +86,9 @@ func UpdateComment(ctx *gin.Context) {
 
 func PostComment(ctx *gin.Context) {
 	db := database.GetDB()
-	contentType := helpers.GetContentType(ctx)
+	contentType := utils.GetContentType(ctx)
 	_, _ = db, contentType
-	Comment := models.Comment{}
+	Comment := entities.Comment{}
 
 	if contentType == appJson {
 		ctx.ShouldBindJSON(&Comment)
