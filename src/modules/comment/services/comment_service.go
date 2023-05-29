@@ -12,3 +12,15 @@ type CommentService interface {
 	GetAll() ([]entities.Comment, error)
 	Delete(id int) error
 }
+
+func (s service) GetAll() ([]entities.Comment, error) {
+	comment, err := s.repository.GetAll()
+
+	return comment, err
+}
+
+func (s service) GetByID(id int) (entities.Comment, error) {
+	comment, err := s.repository.GetByID(id)
+
+	return comment, err
+}
