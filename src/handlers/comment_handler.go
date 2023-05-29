@@ -3,11 +3,58 @@ package handlers
 import (
 	"insta-clone/database"
 	"insta-clone/internals/utils"
+	"insta-clone/src/modules/comment/dto"
 	"insta-clone/src/modules/comment/entities"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
+
+func (h httpHandlerImpl) PostComment(ctx *gin.Context) {
+	userData := ctx.MustGet("userData").(jwt.MapClaims)
+	userID := uint(userData["id"].(float64))
+
+	requestBody := dto.CommentRequestBody{}
+	contentType := utils.GetContentType(ctx)
+
+	if contentType == appJson {
+		ctx.ShouldBindJSON(&requestBody)
+	} else {
+		ctx.ShouldBind(&requestBody)
+	}
+
+	requestBody.UserID = userID
+	requestBody.PhotoID = 13
+
+	comment, err := h.Input(requestBody)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "err get Request",
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"data": comment})
+}
+
+func (h httpHandlerImpl) GetAllComment(ctx *gin.Context) {
+	comments, err := h.GetAll()
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "err get Request",
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"data": comments})
+}
 
 func DeleteComment(ctx *gin.Context) {
 	database.StartDB()
@@ -39,25 +86,6 @@ func GetOneComment(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"data one": comment})
-}
-
-func GetAllComment(ctx *gin.Context) {
-	var db = database.GetDB()
-
-	var comment []entities.Comment
-
-	err := db.Find(&comment).Error
-
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error":   "err get Request",
-			"message": err.Error(),
-		})
-
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{"data": comment})
 }
 
 func UpdateComment(ctx *gin.Context) {
