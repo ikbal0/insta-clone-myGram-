@@ -7,7 +7,7 @@ import (
 
 type CommentService interface {
 	Input(data dto.CommentRequestBody) (entities.Comment, error)
-	Update(id int, data dto.CommentRequestBody) (entities.Comment, error)
+	Update(id int, data dto.CommentRequestBody) (dto.CommentResponse, error)
 	GetByID(id int) (entities.Comment, error)
 	GetAll() ([]entities.Comment, error)
 	Delete(id int) error
@@ -25,7 +25,7 @@ func (s service) Input(data dto.CommentRequestBody) (entities.Comment, error) {
 	return newComment, err
 }
 
-func (s service) Update(id int, data dto.CommentRequestBody) (entities.Comment, error) {
+func (s service) Update(id int, data dto.CommentRequestBody) (dto.CommentResponse, error) {
 	comment := entities.Comment{
 		UserID:  data.UserID,
 		PhotoID: data.PhotoID,

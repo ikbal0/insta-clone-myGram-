@@ -1,12 +1,13 @@
 package repositories
 
 import (
+	"insta-clone/src/modules/comment/dto"
 	"insta-clone/src/modules/comment/entities"
 )
 
 type RepositoryCommentCommand interface {
 	Input(comment entities.Comment) (entities.Comment, error)
-	Update(id int, comment entities.Comment) (entities.Comment, error)
+	Update(id int, comment entities.Comment) (dto.CommentResponse, error)
 	Delete(comment entities.Comment) error
 	GetByID(id int) (entities.Comment, error)
 	GetAll() ([]entities.Comment, error)
@@ -18,7 +19,7 @@ func (r *repository) Input(comment entities.Comment) (entities.Comment, error) {
 	return comment, err
 }
 
-func (r *repository) Update(id int, comment entities.Comment) (entities.Comment, error) {
+func (r *repository) Update(id int, comment entities.Comment) (dto.CommentResponse, error) {
 	var input entities.Comment
 
 	input.PhotoID = comment.PhotoID
@@ -27,7 +28,11 @@ func (r *repository) Update(id int, comment entities.Comment) (entities.Comment,
 
 	err := r.db.Debug().Model(&comment).Where("Id = ?", id).Updates(&input).Error
 
-	return comment, err
+	commentRes := dto.CommentResponse{
+		Message: comment.Message,
+	}
+
+	return commentRes, err
 }
 
 func (r *repository) Delete(comment entities.Comment) error {

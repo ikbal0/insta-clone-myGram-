@@ -1,11 +1,10 @@
 package handlers
 
 import (
-	"insta-clone/database"
 	"insta-clone/internals/utils"
 	"insta-clone/src/modules/comment/dto"
-	"insta-clone/src/modules/comment/entities"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -56,90 +55,66 @@ func (h httpHandlerImpl) GetAllComment(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"data": comments})
 }
 
-func DeleteComment(ctx *gin.Context) {
-	database.StartDB()
-	var db = database.GetDB()
+func (h httpHandlerImpl) DeleteComment(ctx *gin.Context) {
+	getId := ctx.Param("id")
+	id, errConv := strconv.Atoi(getId)
 
-	var comment entities.Comment
-	err := db.First(&comment, "Id = ?", ctx.Param("id")).Error
-
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "record has not found!"})
-		return
+	if errConv != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errConv.Error()})
 	}
 
-	db.Delete(&comment)
+	err := h.Delete(id)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	ctx.JSON(http.StatusOK, gin.H{"deleted:": true})
 }
 
-func GetOneComment(ctx *gin.Context) {
-	var db = database.GetDB()
+func (h httpHandlerImpl) GetOneComment(ctx *gin.Context) {
+	getId := ctx.Param("id")
+	id, errConv := strconv.Atoi(getId)
 
-	var comment []entities.Comment
+	if errConv != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errConv.Error()})
+	}
 
-	err := db.First(&comment, "Id = ?", ctx.Param("id")).Error
+	comment, err := h.GetByID(id)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "record has not found!"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"data one": comment})
 }
 
-func UpdateComment(ctx *gin.Context) {
-	var db = database.GetDB()
+func (h httpHandlerImpl) UpdateComment(ctx *gin.Context) {
+	getId := ctx.Param("id")
+	id, errConv := strconv.Atoi(getId)
 
-	var comment entities.Comment
-
-	err := db.First(&comment, "Id = ?", ctx.Param("id")).Error
-
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "record has not found!"})
-		return
+	if errConv != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errConv.Error()})
 	}
 
-	var input entities.Comment
+	commentRequestBody := dto.CommentRequestBody{}
 
-	if err := ctx.ShouldBindJSON(&input); err != nil {
+	contentType := utils.GetContentType(ctx)
+
+	if contentType == appJson {
+		ctx.ShouldBindJSON(&commentRequestBody)
+	} else {
+		ctx.ShouldBind(&commentRequestBody)
+	}
+
+	comment, err := h.Update(id, commentRequestBody)
+
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	db.Model(&comment).Updates(&input)
-
 	ctx.JSON(http.StatusOK, gin.H{"data": comment})
-}
-
-func PostComment(ctx *gin.Context) {
-	db := database.GetDB()
-	contentType := utils.GetContentType(ctx)
-	_, _ = db, contentType
-	Comment := entities.Comment{}
-
-	if contentType == appJson {
-		ctx.ShouldBindJSON(&Comment)
-	} else {
-		ctx.ShouldBind(&Comment)
-	}
-
-	Comment.UserID = 1
-	Comment.PhotoID = 13
-
-	err := db.Debug().Create(&Comment).Error
-
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
-			"message": err.Error(),
-		})
-
-		return
-	}
-
-	ctx.JSON(http.StatusCreated, gin.H{
-		"message": "Comment posted",
-		"data":    Comment,
-	})
 }

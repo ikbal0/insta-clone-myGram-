@@ -38,10 +38,10 @@ func StartApp() *gin.Engine {
 	{
 		commentRoute.Use(middleware.Authentication())
 		commentRoute.POST("/", handler.PostComment)
-		commentRoute.PATCH("/:id", handlers.UpdateComment)
+		commentRoute.PATCH("/:id", handler.UpdateComment)
 		commentRoute.GET("/", handler.GetAllComment)
-		commentRoute.GET("/:id", handlers.GetOneComment)
-		commentRoute.DELETE("/:id", handlers.DeleteComment)
+		commentRoute.GET("/:id", handler.GetOneComment)
+		commentRoute.DELETE("/:id", handler.DeleteComment)
 	}
 
 	// router.GET("/test", controllers.GetAllPhoto)
