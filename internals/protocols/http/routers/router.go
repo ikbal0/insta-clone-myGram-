@@ -1,22 +1,15 @@
 package routers
 
 import (
-	"insta-clone/database"
 	"insta-clone/internals/protocols/http/middleware"
 	"insta-clone/src/handlers"
-	"insta-clone/src/modules/comment/repositories"
-	"insta-clone/src/modules/comment/services"
 
 	"github.com/gin-gonic/gin"
 )
 
 func StartApp() *gin.Engine {
 	router := gin.Default()
-
-	db := database.GetDB()
-	repository := repositories.NewRepository(db)
-	service := services.NewService(repository)
-	handler := handlers.NewHttpHandler(service)
+	handler := handlers.NewHttpHandler()
 
 	userRoute := router.Group("/user")
 	{

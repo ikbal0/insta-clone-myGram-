@@ -6,7 +6,9 @@ type httpHandlerImpl struct {
 	services.CommentService
 }
 
-func NewHttpHandler(commentService services.CommentService) *httpHandlerImpl {
+func NewHttpHandler() *httpHandlerImpl {
+	commentService := services.NewCommentService()
+
 	return &httpHandlerImpl{
 		CommentService: commentService,
 	}

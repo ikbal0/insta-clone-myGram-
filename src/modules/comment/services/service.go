@@ -6,7 +6,8 @@ type service struct {
 	repository repositories.RepositoryCommentCommand
 }
 
-func NewService(repository repositories.RepositoryCommentCommand) *service {
+func NewCommentService() *service {
+	repository := repositories.NewCommentRepository()
 	service := &service{repository}
 
 	return service
