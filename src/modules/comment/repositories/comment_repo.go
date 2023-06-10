@@ -29,7 +29,8 @@ func (r *repository) Update(id int, comment entities.Comment) (dto.CommentRespon
 	err := r.db.Debug().Model(&comment).Where("Id = ?", id).Updates(&input).Error
 
 	commentRes := dto.CommentResponse{
-		Message: comment.Message,
+		Message:   comment.Message,
+		UpdatedAt: comment.UpdatedAt,
 	}
 
 	return commentRes, err

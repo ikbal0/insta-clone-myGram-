@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"insta-clone/database"
 	"insta-clone/internals/utils"
@@ -15,14 +16,14 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 func UpdatePhoto(ctx *gin.Context) {
 	var db = database.GetDB()
 	var photo entities.Photo
 	var input entities.Photo
-	err := db.First(&photo, "Id = ?", ctx.Param("photoId")).Error
+	photoId := ctx.Param("photoId")
+	err := db.First(&photo, "Id = ?", photoId).Error
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "record has not found!"})
@@ -83,7 +84,8 @@ func UpdatePhoto(ctx *gin.Context) {
 
 	writer.Close()
 
-	req, err := http.NewRequest("PATCH", "http://localhost:3000/image", bytes.NewReader(body.Bytes()))
+	imageId := strconv.Itoa(int(photo.ImageID))
+	req, err := http.NewRequest("PATCH", "http://localhost:3000/image/"+imageId, bytes.NewReader(body.Bytes()))
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -113,7 +115,6 @@ func UpdatePhoto(ctx *gin.Context) {
 	}
 
 	ctx.ShouldBindJSON(&input)
-	db.Model(&photo).Updates(&input)
 
 	ctx.JSON(http.StatusCreated, gin.H{
 		"message": "file sended",
@@ -124,7 +125,7 @@ func UpdatePhoto(ctx *gin.Context) {
 
 	// delete temporary file
 	path := "temp/tempFile" + fileIn.Filename
-	defer utils.DeleteTempFile(path, ctx)
+	defer utils.DeleteTempFile(path)
 }
 
 func (h httpHandlerImpl) GetAllPhoto(ctx *gin.Context) {
@@ -235,14 +236,13 @@ func DeleteImage(ctx *gin.Context) {
 	})
 }
 
-func UploadFile(ctx *gin.Context) {
-	userData := ctx.MustGet("userData").(jwt.MapClaims)
-	userID := uint(userData["id"].(float64))
-	db := database.GetDB()
+func (h httpHandlerImpl) UploadFile(ctx *gin.Context) {
+	userID := utils.GetUserID(ctx)
 
 	// getting form post
 	caption := ctx.PostForm("caption")
 	title := ctx.PostForm("title")
+
 	// getting file form user input
 	fileIn, err := ctx.FormFile("file")
 	if err != nil {
@@ -253,12 +253,41 @@ func UploadFile(ctx *gin.Context) {
 		return
 	}
 	// save file to temp folder
-	if err := ctx.SaveUploadedFile(fileIn, "temp/tempFile"+fileIn.Filename); err != nil {
+	if err := ctx.SaveUploadedFile(fileIn, "temp/"+fileIn.Filename); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"message": "Unable to save file",
 		})
 		return
 	}
+
+	photo, err := fileServerPostReq(userID, caption, title, fileIn)
+
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"message": "Something wrong when send file to file server",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	savedPhoto, savedErr := h.PhotoService.Input(photo)
+
+	if savedErr != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Bad Request",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, gin.H{
+		"message": "file sended",
+		"photo":   savedPhoto,
+	})
+}
+
+func fileServerPostReq(userID uint, caption string, title string, fileIn *multipart.FileHeader) (entities.Photo, error) {
+	photo := entities.Photo{}
 
 	client := &http.Client{
 		Timeout: time.Second * 10,
@@ -268,64 +297,46 @@ func UploadFile(ctx *gin.Context) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	writer.WriteField("userId", strconv.Itoa(int(userID)))
-	fw, err := writer.CreateFormFile("file", "temp/tempFile"+fileIn.Filename)
+
+	fw, err := writer.CreateFormFile("file", "temp/"+fileIn.Filename)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Error create form file",
-			"message": err.Error(),
-		})
-		return
+		return photo, err
 	}
 
-	file, err := os.Open("temp/tempFile" + fileIn.Filename)
+	file, err := os.Open("temp/" + fileIn.Filename)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Error Open file",
-			"message": err.Error(),
-		})
-		return
+		return photo, err
 	}
 
 	_, err = io.Copy(fw, file)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Error Copy",
-			"message": err.Error(),
-		})
-		return
+		return photo, err
 	}
 
 	writer.Close()
 
-	req, err := http.NewRequest("POST", "http://localhost:3000/image", bytes.NewReader(body.Bytes()))
+	// send save request to image server
+	newBody := bytes.NewReader(body.Bytes())
+	req, err := http.NewRequest("POST", "http://localhost:3000/image", newBody)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
-			"message": err.Error(),
-		})
-		return
+		return photo, err
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	rsp, _ := client.Do(req)
 
 	if rsp.StatusCode != http.StatusOK {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
-			"message": fmt.Sprintf("Request failed with response code: %d", rsp.StatusCode),
-		})
-		// return
+		statusCode := strconv.Itoa(rsp.StatusCode)
+		message := "Request failed with response code: " + statusCode
+		err := errors.New(message)
+		return photo, err
 	}
 
 	resBody, err := io.ReadAll(rsp.Body)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error":   "io read all",
-			"message": err.Error(),
-		})
-		return
+		return photo, err
 	}
 
 	type Image struct {
@@ -335,9 +346,14 @@ func UploadFile(ctx *gin.Context) {
 	}
 
 	var responseObj Image
-	photo := entities.Photo{}
 
 	json.Unmarshal(resBody, &responseObj)
+
+	file.Close()
+
+	// delete temporary file
+	path := "temp/" + fileIn.Filename
+	defer utils.DeleteTempFile(path)
 
 	photo.Caption = caption
 	photo.Title = title
@@ -345,24 +361,5 @@ func UploadFile(ctx *gin.Context) {
 	photo.UserID = responseObj.UserID
 	photo.ImageID = responseObj.ImageID
 
-	errCreate := db.Debug().Create(&photo).Error
-	if errCreate != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
-			"message": err.Error(),
-		})
-		return
-	}
-
-	ctx.JSON(http.StatusCreated, gin.H{
-		"message":           "file sended",
-		"image server resp": responseObj,
-		"photo":             photo,
-	})
-
-	file.Close()
-
-	// delete temporary file
-	path := "temp/tempFile" + fileIn.Filename
-	defer utils.DeleteTempFile(path, ctx)
+	return photo, nil
 }
