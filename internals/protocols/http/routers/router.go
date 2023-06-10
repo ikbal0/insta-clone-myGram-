@@ -43,8 +43,8 @@ func StartApp() *gin.Engine {
 	photoRoute := router.Group("/photo")
 	{
 		photoRoute.Use(middleware.Authentication())
-		photoRoute.GET("/", handlers.GetAllPhoto)
-		photoRoute.GET("/:photoId", handlers.GetOnePhoto)
+		photoRoute.GET("/", handler.GetAllPhoto)
+		photoRoute.GET("/:photoId", handler.GetOnePhoto)
 	}
 
 	router.MaxMultipartMemory = 8 << 20

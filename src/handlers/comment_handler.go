@@ -26,7 +26,7 @@ func (h httpHandlerImpl) PostComment(ctx *gin.Context) {
 	requestBody.UserID = userID
 	requestBody.PhotoID = 13
 
-	comment, err := h.Input(requestBody)
+	comment, err := h.CommentService.Input(requestBody)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -41,7 +41,7 @@ func (h httpHandlerImpl) PostComment(ctx *gin.Context) {
 }
 
 func (h httpHandlerImpl) GetAllComment(ctx *gin.Context) {
-	comments, err := h.GetAll()
+	comments, err := h.CommentService.GetAll()
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -63,7 +63,7 @@ func (h httpHandlerImpl) DeleteComment(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": errConv.Error()})
 	}
 
-	err := h.Delete(id)
+	err := h.CommentService.Delete(id)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -81,7 +81,7 @@ func (h httpHandlerImpl) GetOneComment(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": errConv.Error()})
 	}
 
-	comment, err := h.GetByID(id)
+	comment, err := h.CommentService.GetByID(id)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -109,7 +109,7 @@ func (h httpHandlerImpl) UpdateComment(ctx *gin.Context) {
 		ctx.ShouldBind(&commentRequestBody)
 	}
 
-	comment, err := h.Update(id, commentRequestBody)
+	comment, err := h.CommentService.Update(id, commentRequestBody)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

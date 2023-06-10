@@ -35,14 +35,14 @@ func (r *repository) Delete(photo entities.Photo) error {
 
 func (r *repository) GetAll() ([]entities.Photo, error) {
 	var photo []entities.Photo
-	err := r.db.Find(&photo).Error
+	err := r.db.Preload("Comments").Find(&photo).Error
 
 	return photo, err
 }
 
 func (r *repository) GetByID(id int) (entities.Photo, error) {
 	var photo entities.Photo
-	err := r.db.First(&photo, "Id = ?", id).Error
+	err := r.db.Preload("Comments").First(&photo, "Id = ?", id).Error
 
 	return photo, err
 }

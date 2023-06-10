@@ -127,12 +127,8 @@ func UpdatePhoto(ctx *gin.Context) {
 	defer utils.DeleteTempFile(path, ctx)
 }
 
-func GetAllPhoto(ctx *gin.Context) {
-	var db = database.GetDB()
-
-	var photo []entities.Photo
-
-	err := db.Preload("Comments").Find(&photo).Error
+func (h httpHandlerImpl) GetAllPhoto(ctx *gin.Context) {
+	photos, err := h.PhotoService.GetAll()
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -143,18 +139,21 @@ func GetAllPhoto(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"data": photo})
+	ctx.JSON(http.StatusOK, gin.H{"data": photos})
 }
 
-func GetOnePhoto(ctx *gin.Context) {
-	var db = database.GetDB()
+func (h httpHandlerImpl) GetOnePhoto(ctx *gin.Context) {
+	getId := ctx.Param("photoId")
+	id, errConv := strconv.Atoi(getId)
 
-	var photo []entities.Photo
+	if errConv != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errConv.Error()})
+	}
 
-	err := db.First(&photo, "Id = ?", ctx.Param("photoId")).Error
+	photo, err := h.PhotoService.GetByID(id)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "record has not found!"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
