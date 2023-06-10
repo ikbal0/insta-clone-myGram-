@@ -1,12 +1,17 @@
 package repositories
 
-import "gorm.io/gorm"
+import (
+	"insta-clone/database"
+
+	"gorm.io/gorm"
+)
 
 type repository struct {
 	db *gorm.DB
 }
 
-func NewRepository(db *gorm.DB) *repository {
+func NewPhotoRepository() *repository {
+	db := database.GetDB()
 	tx := &repository{db: db}
 	return tx
 }
