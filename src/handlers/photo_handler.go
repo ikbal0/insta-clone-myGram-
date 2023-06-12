@@ -18,12 +18,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func UpdatePhoto(ctx *gin.Context) {
-	var db = database.GetDB()
-	var photo entities.Photo
-	var input entities.Photo
-	photoId := ctx.Param("photoId")
-	err := db.First(&photo, "Id = ?", photoId).Error
+func (h httpHandlerImpl) UpdatePhoto(ctx *gin.Context) {
+	// var photo entities.Photo
+	input := entities.Photo{}
+	getId := ctx.Param("photoId")
+	id, err := strconv.Atoi(getId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "convert failed!"})
+		return
+	}
+	photo, err := h.PhotoService.GetByID(id)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "record has not found!"})
@@ -32,11 +36,21 @@ func UpdatePhoto(ctx *gin.Context) {
 
 	fileIn, err := ctx.FormFile("file")
 	if err != nil {
-		ctx.ShouldBindJSON(&input)
+		checkContentTypeAndBind(&input, ctx)
+		// db.Model(&photo).Updates(&input)
+		updatedPhoto, err := h.PhotoService.Update(id, input)
 
-		db.Model(&photo).Updates(&input)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"message": "update photo failed",
+				"error":   err.Error(),
+			})
+		}
 
-		ctx.JSON(http.StatusOK, gin.H{"data": photo})
+		ctx.JSON(http.StatusOK, gin.H{
+			"data": updatedPhoto,
+			// "input": input,
+		})
 		return
 	}
 
@@ -114,11 +128,20 @@ func UpdatePhoto(ctx *gin.Context) {
 		return
 	}
 
-	ctx.ShouldBindJSON(&input)
+	checkContentTypeAndBind(&input, ctx)
+	updatedPhoto, err := h.PhotoService.Update(id, input)
+	// db.Model(&photo).Updates(&input)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "failed to update photo",
+			"error":   err.Error(),
+		})
+		return
+	}
 
 	ctx.JSON(http.StatusCreated, gin.H{
-		"message": "file sended",
-		"photo":   photo,
+		"photo": updatedPhoto,
 	})
 
 	file.Close()
@@ -362,4 +385,14 @@ func fileServerPostReq(userID uint, caption string, title string, fileIn *multip
 	photo.ImageID = responseObj.ImageID
 
 	return photo, nil
+}
+
+func checkContentTypeAndBind(input *entities.Photo, ctx *gin.Context) {
+	contentType := utils.GetContentType(ctx)
+
+	if contentType == appJson {
+		ctx.ShouldBindJSON(&input)
+	} else {
+		ctx.ShouldBind(&input)
+	}
 }
