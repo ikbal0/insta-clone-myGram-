@@ -49,8 +49,8 @@ func StartApp() *gin.Engine {
 
 	router.MaxMultipartMemory = 8 << 20
 	router.POST("/photo", middleware.Authentication(), handler.UploadFile)
-	router.DELETE("/photo/:photoId", handlers.DeleteImage)
-	router.PATCH("/photo/:photoId", handlers.UpdatePhoto)
+	router.DELETE("/photo/:photoId", handler.DeleteImage)
+	router.PATCH("/photo/:photoId", handler.UpdatePhoto)
 
 	return router
 }

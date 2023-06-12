@@ -27,13 +27,21 @@ func (s service) Input(data entities.Photo) (entities.Photo, error) {
 }
 
 func (s service) Update(id int, data entities.Photo) (entities.Photo, error) {
-	// comment := entities.Comment{
-	// 	UserID:  data.UserID,
-	// 	PhotoID: data.PhotoID,
-	// 	Message: data.Message,
-	// }
+	photo, errGetPhoto := s.repository.GetByID(id)
+	if errGetPhoto != nil {
+		return photo, errGetPhoto
+	}
 
-	newPhoto, err := s.repository.Update(id, data)
+	photoData := entities.Photo{
+		Title:    data.Title,
+		Caption:  data.Caption,
+		PhotoUrl: photo.PhotoUrl,
+		UserID:   photo.UserID,
+		ImageID:  photo.ImageID,
+		Comments: photo.Comments,
+	}
+
+	newPhoto, err := s.repository.Update(id, photoData)
 
 	return newPhoto, err
 }
