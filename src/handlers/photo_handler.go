@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"insta-clone/database"
 	"insta-clone/internals/utils"
 	"insta-clone/src/modules/photo/entities"
 	"io"
@@ -184,14 +183,11 @@ func (h httpHandlerImpl) GetOnePhoto(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"data one": photo})
 }
 
-func DeleteImage(ctx *gin.Context) {
-	db := database.GetDB()
-	PhotoDelete := entities.Photo{}
+func (h httpHandlerImpl) DeleteImage(ctx *gin.Context) {
 	photoId, _ := strconv.Atoi(ctx.Param("photoId"))
 
-	err := db.First(&PhotoDelete, "Id = ?", photoId).Error
-
-	imageId := strconv.Itoa(int(PhotoDelete.ImageID))
+	photo, err := h.PhotoService.GetByID(photoId)
+	imageId := strconv.Itoa(int(photo.ImageID))
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "record has not found!"})
@@ -234,12 +230,13 @@ func DeleteImage(ctx *gin.Context) {
 		return
 	}
 
-	errDelete := db.Debug().Delete(&PhotoDelete).Error
+	errDelete := h.PhotoService.Delete(photoId)
+	// errDelete := db.Debug().Delete(&photo).Error
 
 	if errDelete != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error":   "delete fail",
-			"message": err.Error(),
+			"message": "delete fail",
+			"error":   err.Error(),
 		})
 		return
 	}
@@ -253,10 +250,23 @@ func DeleteImage(ctx *gin.Context) {
 		return
 	}
 
+	message := convertResponseBody(resBody)
+
 	ctx.JSON(http.StatusBadRequest, gin.H{
-		"message": "delete success!",
-		"resp":    string(resBody),
+		"message": message,
 	})
+}
+
+func convertResponseBody(resBody []byte) string {
+	type message struct {
+		Message string `json:"message"`
+	}
+
+	var m message
+	o := string(resBody)
+	json.Unmarshal([]byte(o), &m)
+
+	return m.Message
 }
 
 func (h httpHandlerImpl) UploadFile(ctx *gin.Context) {
