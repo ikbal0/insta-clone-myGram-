@@ -20,10 +20,10 @@ func StartApp() *gin.Engine {
 	socialMediaRoute := router.Group("/social-media")
 	{
 		socialMediaRoute.Use(middleware.Authentication())
-		socialMediaRoute.POST("/", handlers.PostSocialMed)
+		socialMediaRoute.POST("/", handler.PostSocialMed)
 		socialMediaRoute.GET("/", handlers.GetAllSocialMed)
 		socialMediaRoute.GET("/:id", handlers.GetOneSocialMed)
-		socialMediaRoute.PATCH("/:id", handlers.UpdateSocialMed)
+		socialMediaRoute.PATCH("/:id", handler.UpdateSocialMed)
 		socialMediaRoute.DELETE("/:id", middleware.SocialMedAuthorization(), handlers.DeleteSocialMed)
 	}
 
