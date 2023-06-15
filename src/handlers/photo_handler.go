@@ -257,18 +257,6 @@ func (h httpHandlerImpl) DeleteImage(ctx *gin.Context) {
 	})
 }
 
-func convertResponseBody(resBody []byte) string {
-	type message struct {
-		Message string `json:"message"`
-	}
-
-	var m message
-	o := string(resBody)
-	json.Unmarshal([]byte(o), &m)
-
-	return m.Message
-}
-
 func (h httpHandlerImpl) UploadFile(ctx *gin.Context) {
 	userID := utils.GetUserID(ctx)
 
@@ -405,4 +393,16 @@ func checkContentTypeAndBind(input *entities.Photo, ctx *gin.Context) {
 	} else {
 		ctx.ShouldBind(&input)
 	}
+}
+
+func convertResponseBody(resBody []byte) string {
+	type message struct {
+		Message string `json:"message"`
+	}
+
+	var m message
+	o := string(resBody)
+	json.Unmarshal([]byte(o), &m)
+
+	return m.Message
 }
