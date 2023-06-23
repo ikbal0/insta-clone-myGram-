@@ -14,7 +14,7 @@ func StartApp() *gin.Engine {
 	userRoute := router.Group("/user")
 	{
 		userRoute.POST("/register", handlers.Register)
-		userRoute.POST("/login", handlers.Login)
+		userRoute.POST("/login", handler.Login)
 	}
 
 	socialMediaRoute := router.Group("/social-media")

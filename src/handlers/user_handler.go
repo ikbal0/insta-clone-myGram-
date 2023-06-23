@@ -13,12 +13,9 @@ var (
 	appJson = "application/json"
 )
 
-func Login(c *gin.Context) {
-	db := database.GetDB()
+func (h httpHandlerImpl) Login(c *gin.Context) {
 	contentType := utils.GetContentType(c)
-	_, _ = db, contentType
 	User := entities.User{}
-	password := ""
 
 	if contentType == appJson {
 		c.ShouldBindJSON(&User)
@@ -26,31 +23,17 @@ func Login(c *gin.Context) {
 		c.ShouldBind(&User)
 	}
 
-	password = User.Password
-	err := db.Debug().Where("email = ?", User.Email).Take(&User).Error
+	data, err := h.UserService.GetByEmail(User)
 
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error":   "Unauthorize",
-			"message": "Invalid email/password",
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": data,
+			"error":   err.Error(),
 		})
-		return
 	}
-
-	comparePass := utils.ComparePass([]byte(User.Password), []byte(password))
-
-	if !comparePass {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error":   "Unauthorize",
-			"message": "Invalid email/password",
-		})
-		return
-	}
-
-	token := utils.TokenGenerator(User.ID, User.Email)
 
 	c.JSON(http.StatusOK, gin.H{
-		"token": token,
+		"token": data,
 	})
 }
 
