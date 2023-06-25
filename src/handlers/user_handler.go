@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"insta-clone/database"
 	"insta-clone/internals/utils"
+	"insta-clone/src/modules/user/dto"
 	"insta-clone/src/modules/user/entities"
 	"net/http"
 
@@ -30,6 +30,7 @@ func (h httpHandlerImpl) Login(c *gin.Context) {
 			"message": data,
 			"error":   err.Error(),
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -37,19 +38,19 @@ func (h httpHandlerImpl) Login(c *gin.Context) {
 	})
 }
 
-func Register(ctx *gin.Context) {
-	db := database.GetDB()
+func (h httpHandlerImpl) Register(ctx *gin.Context) {
 	contentType := utils.GetContentType(ctx)
-	_, _ = db, contentType
-	User := entities.User{}
+
+	data := dto.UserRequestBody{}
 
 	if contentType == appJson {
-		ctx.ShouldBindJSON(&User)
+		ctx.ShouldBindJSON(&data)
 	} else {
-		ctx.ShouldBind(&User)
+		ctx.ShouldBind(&data)
 	}
 
-	err := db.Debug().Create(&User).Error
+	// err := db.Debug().Create(&User).Error
+	user, err := h.UserService.Input(data)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -61,12 +62,6 @@ func Register(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, gin.H{
-		"id":         User.ID,
-		"username":   User.Username,
-		"email":      User.Email,
-		"password":   User.Password,
-		"age":        User.Age,
-		"created_at": User.CreatedAt,
-		"updated_at": User.UpdatedAt,
+		"data": user,
 	})
 }
