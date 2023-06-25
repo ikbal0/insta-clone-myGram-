@@ -4,9 +4,23 @@ import (
 	"insta-clone/internals/protocols/http/middleware"
 	"insta-clone/src/handlers"
 
+	_ "insta-clone/docs"
+
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// @title Insta Clone Api
+// @version 1.0
+// @description This is a simple services for managing cars
+// @termsOfService http://swagger.io/terms/
+// @contact.name API Support
+// @contact.email devyad@gmail.com
+// @license.name Apace 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @host localhost:8080
+// @BasePath /
 func StartApp() *gin.Engine {
 	router := gin.Default()
 	handler := handlers.NewHttpHandler()
@@ -30,15 +44,17 @@ func StartApp() *gin.Engine {
 	commentRoute := router.Group("/comment")
 	{
 		commentRoute.Use(middleware.Authentication())
+		// Create
 		commentRoute.POST("/", handler.PostComment)
+		// Update
 		commentRoute.PATCH("/:id", handler.UpdateComment)
+		// Read All
 		commentRoute.GET("/", handler.GetAllComment)
+		// Read
 		commentRoute.GET("/:id", handler.GetOneComment)
+		// Delete
 		commentRoute.DELETE("/:id", handler.DeleteComment)
 	}
-
-	// router.GET("/test", controllers.GetAllPhoto)
-	// router.POST("/test", controllers.PostTest)
 
 	photoRoute := router.Group("/photo")
 	{
@@ -51,6 +67,8 @@ func StartApp() *gin.Engine {
 	router.POST("/photo", middleware.Authentication(), handler.UploadFile)
 	router.DELETE("/photo/:photoId", handler.DeleteImage)
 	router.PATCH("/photo/:photoId", handler.UpdatePhoto)
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	return router
 }

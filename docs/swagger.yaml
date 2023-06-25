@@ -1,0 +1,120 @@
+basePath: /
+definitions:
+  entities.Comment:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      message:
+        type: string
+      photoID:
+        type: integer
+      updated_at:
+        type: string
+      userID:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: devyad@gmail.com
+    name: API Support
+  description: This is a simple services for managing cars
+  license:
+    name: Apace 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Insta Clone Api
+  version: "1.0"
+paths:
+  /cars:
+    get:
+      consumes:
+      - application/json
+      description: Get details of all car
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Comment'
+      summary: Get details
+      tags:
+      - cars
+    post:
+      consumes:
+      - application/json
+      description: Get details of car corresponding to the input id
+      parameters:
+      - description: create car
+        in: body
+        name: entities.Comment
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Comment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Comment'
+      summary: Post details for a given id
+      tags:
+      - cars
+  /cars/{Id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete the car corresponding to the input id
+      parameters:
+      - description: ID of the car to be deleted
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No content
+      summary: Delete car identified by given id
+      tags:
+      - cars
+    get:
+      consumes:
+      - application/json
+      description: Get details of car corresponding to the input id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Comment'
+      summary: Get details for a given id
+      tags:
+      - cars
+    patch:
+      consumes:
+      - application/json
+      description: Update details of car corresponding to the input id
+      parameters:
+      - description: ID of the car to be updated
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Comment'
+      summary: Update car identified by given id
+      tags:
+      - cars
+swagger: "2.0"
