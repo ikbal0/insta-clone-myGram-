@@ -18,6 +18,24 @@ definitions:
       updated_at:
         type: string
     type: object
+  dto.UserLoginRequestBody:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  dto.UserRequestBody:
+    properties:
+      age:
+        type: integer
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
   entities.Comment:
     properties:
       created_at:
@@ -70,6 +88,23 @@ definitions:
         type: string
       userID:
         type: integer
+    type: object
+  entities.User:
+    properties:
+      age:
+        type: integer
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      password:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
     type: object
 host: localhost:8080
 info:
@@ -358,6 +393,50 @@ paths:
       summary: Update social media identified by given id
       tags:
       - Social Media
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: Login User
+      parameters:
+      - description: login
+        in: body
+        name: dto.UserLoginRequestBody
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserLoginRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.User'
+      summary: Login User
+      tags:
+      - User
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: Register User
+      parameters:
+      - description: user register
+        in: body
+        name: dto.UserRequestBody
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.User'
+      summary: Register User
+      tags:
+      - User
 securityDefinitions:
   Bearer:
     description: Type "Bearer" followed by a space and JWT token.

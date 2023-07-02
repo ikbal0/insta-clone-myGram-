@@ -3,7 +3,6 @@ package handlers
 import (
 	"insta-clone/internals/utils"
 	"insta-clone/src/modules/user/dto"
-	"insta-clone/src/modules/user/entities"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,9 +12,18 @@ var (
 	appJson = "application/json"
 )
 
+// Login godoc
+// @Summary Login User
+// @Description Login User
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param dto.UserLoginRequestBody body dto.UserLoginRequestBody true "login"
+// @Success 200 {object} "token"
+// @Router /user/login [post]
 func (h httpHandlerImpl) Login(c *gin.Context) {
 	contentType := utils.GetContentType(c)
-	User := entities.User{}
+	User := dto.UserLoginRequestBody{}
 
 	if contentType == appJson {
 		c.ShouldBindJSON(&User)
@@ -38,6 +46,15 @@ func (h httpHandlerImpl) Login(c *gin.Context) {
 	})
 }
 
+// Register User godoc
+// @Summary Register User
+// @Description Register User
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param dto.UserRequestBody body dto.UserRequestBody true "user register"
+// @Success 200 {object} entities.User
+// @Router /user/register [post]
 func (h httpHandlerImpl) Register(ctx *gin.Context) {
 	contentType := utils.GetContentType(ctx)
 

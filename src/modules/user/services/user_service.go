@@ -9,7 +9,7 @@ import (
 
 type UserService interface {
 	Input(data dto.UserRequestBody) (entities.User, error)
-	GetByEmail(formData entities.User) (string, error)
+	GetByEmail(formData dto.UserLoginRequestBody) (string, error)
 }
 
 func (s service) Input(data dto.UserRequestBody) (entities.User, error) {
@@ -25,7 +25,7 @@ func (s service) Input(data dto.UserRequestBody) (entities.User, error) {
 	return newUser, err
 }
 
-func (s service) GetByEmail(formData entities.User) (string, error) {
+func (s service) GetByEmail(formData dto.UserLoginRequestBody) (string, error) {
 	user, err := s.repository.GetByEmail(formData.Email)
 
 	comparePass := utils.ComparePass([]byte(user.Password), []byte(formData.Password))

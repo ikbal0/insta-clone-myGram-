@@ -6,3 +6,8 @@ type UserRequestBody struct {
 	Password string `json:"password" form:"password"`
 	Age      int    `json:"age" form:"age"`
 }
+
+type UserLoginRequestBody struct {
+	Email    string `json:"email" form:"email"`
+	Password string `json:"password" form:"password"`
+}
