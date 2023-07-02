@@ -57,7 +57,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "Create Comment corresponding to the photo id in param",
+                "description": "Create social media",
                 "consumes": [
                     "application/json"
                 ],
@@ -65,17 +65,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Comment"
+                    "Social Media"
                 ],
-                "summary": "Post comment for a given id",
+                "summary": "Post social media for a given id",
                 "parameters": [
                     {
-                        "description": "create comment",
-                        "name": "dto.CommentRequestBody",
+                        "description": "create social media",
+                        "name": "entities.SocialMedia",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CommentRequestBody"
+                            "$ref": "#/definitions/entities.SocialMedia"
                         }
                     }
                 ],
@@ -83,7 +83,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entities.Comment"
+                            "$ref": "#/definitions/entities.SocialMedia"
                         }
                     }
                 }
@@ -344,7 +344,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/social-media": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get details of all social media",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Social Media"
+                ],
+                "summary": "Get details",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entities.SocialMedia"
+                        }
+                    }
+                }
+            }
+        },
         "/social-media/{Id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get details of social media corresponding to the input id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Social Media"
+                ],
+                "summary": "Get social media for a given id",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entities.SocialMedia"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -376,6 +430,41 @@ const docTemplate = `{
                         "description": "No content"
                     }
                 }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update details of social media corresponding to the input id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Social Media"
+                ],
+                "summary": "Update social media identified by given id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the social media to be updated",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.SocialMediaUpdateResponse"
+                        }
+                    }
+                }
             }
         }
     },
@@ -391,6 +480,20 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "dto.SocialMediaUpdateResponse": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "social_media_url": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },
@@ -442,6 +545,29 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entities.SocialMedia": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "social_media_url": {
                     "type": "string"
                 },
                 "updated_at": {

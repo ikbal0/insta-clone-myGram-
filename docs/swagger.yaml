@@ -9,6 +9,15 @@ definitions:
       user_id:
         type: integer
     type: object
+  dto.SocialMediaUpdateResponse:
+    properties:
+      name:
+        type: string
+      social_media_url:
+        type: string
+      updated_at:
+        type: string
+    type: object
   entities.Comment:
     properties:
       created_at:
@@ -41,6 +50,21 @@ definitions:
       photo_url:
         type: string
       title:
+        type: string
+      updated_at:
+        type: string
+      userID:
+        type: integer
+    type: object
+  entities.SocialMedia:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      social_media_url:
         type: string
       updated_at:
         type: string
@@ -80,26 +104,26 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create Comment corresponding to the photo id in param
+      description: Create social media
       parameters:
-      - description: create comment
+      - description: create social media
         in: body
-        name: dto.CommentRequestBody
+        name: entities.SocialMedia
         required: true
         schema:
-          $ref: '#/definitions/dto.CommentRequestBody'
+          $ref: '#/definitions/entities.SocialMedia'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/entities.Comment'
+            $ref: '#/definitions/entities.SocialMedia'
       security:
       - Bearer: []
-      summary: Post comment for a given id
+      summary: Post social media for a given id
       tags:
-      - Comment
+      - Social Media
   /comment/{Id}:
     delete:
       consumes:
@@ -258,6 +282,23 @@ paths:
       summary: Update photo identified by given id
       tags:
       - Photo
+  /social-media:
+    get:
+      consumes:
+      - application/json
+      description: Get details of all social media
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.SocialMedia'
+      security:
+      - Bearer: []
+      summary: Get details
+      tags:
+      - Social Media
   /social-media/{Id}:
     delete:
       consumes:
@@ -277,6 +318,44 @@ paths:
       security:
       - Bearer: []
       summary: Delete social media identified by given id
+      tags:
+      - Social Media
+    get:
+      consumes:
+      - application/json
+      description: Get details of social media corresponding to the input id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.SocialMedia'
+      security:
+      - Bearer: []
+      summary: Get social media for a given id
+      tags:
+      - Social Media
+    patch:
+      consumes:
+      - application/json
+      description: Update details of social media corresponding to the input id
+      parameters:
+      - description: ID of the social media to be updated
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SocialMediaUpdateResponse'
+      security:
+      - Bearer: []
+      summary: Update social media identified by given id
       tags:
       - Social Media
 securityDefinitions:
