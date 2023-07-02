@@ -21,23 +21,34 @@ import (
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 // @host localhost:8080
 // @BasePath /
+// @securityDefinitions.apikey Bearer
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 func StartApp() *gin.Engine {
 	router := gin.Default()
 	handler := handlers.NewHttpHandler()
 
 	userRoute := router.Group("/user")
 	{
+		// Create
 		userRoute.POST("/register", handler.Register)
+		// Login
 		userRoute.POST("/login", handler.Login)
 	}
 
 	socialMediaRoute := router.Group("/social-media")
 	{
 		socialMediaRoute.Use(middleware.Authentication())
+		// Create
 		socialMediaRoute.POST("/", handler.PostSocialMed)
+		// Read All
 		socialMediaRoute.GET("/", handler.GetAllSocialMed)
+		// Read
 		socialMediaRoute.GET("/:id", handler.GetOneSocialMed)
+		// Update
 		socialMediaRoute.PATCH("/:id", handler.UpdateSocialMed)
+		// Delete
 		socialMediaRoute.DELETE("/:id", middleware.SocialMedAuthorization(), handler.DeleteSocialMed)
 	}
 
@@ -59,13 +70,18 @@ func StartApp() *gin.Engine {
 	photoRoute := router.Group("/photo")
 	{
 		photoRoute.Use(middleware.Authentication())
+		// Read All
 		photoRoute.GET("/", handler.GetAllPhoto)
+		// Read
 		photoRoute.GET("/:photoId", handler.GetOnePhoto)
 	}
 
 	router.MaxMultipartMemory = 8 << 20
+	// Create
 	router.POST("/photo", middleware.Authentication(), handler.UploadFile)
+	// Delete
 	router.DELETE("/photo/:photoId", handler.DeleteImage)
+	// Update
 	router.PATCH("/photo/:photoId", handler.UpdatePhoto)
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))

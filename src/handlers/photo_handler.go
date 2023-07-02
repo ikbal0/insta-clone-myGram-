@@ -17,6 +17,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Update Photo godoc
+// @Summary Update photo identified by given id
+// @Description Update details of Photo corresponding to the input id
+// @Tags Photo
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the photo to be updated"
+// @Success 200 {object} entities.Photo
+// @Router /photo/{Id} [patch]
+// @Security Bearer
 func (h httpHandlerImpl) UpdatePhoto(ctx *gin.Context) {
 	// var photo entities.Photo
 	input := entities.Photo{}
@@ -150,6 +160,15 @@ func (h httpHandlerImpl) UpdatePhoto(ctx *gin.Context) {
 	defer utils.DeleteTempFile(path)
 }
 
+// Get All Photo godoc
+// @Summary Get details
+// @Description Get details of all photo
+// @Tags Photo
+// @Accept json
+// @Produce json
+// @Success 200 {object} entities.Photo
+// @Router /photo [get]
+// @Security Bearer
 func (h httpHandlerImpl) GetAllPhoto(ctx *gin.Context) {
 	photos, err := h.PhotoService.GetAll()
 
@@ -165,6 +184,15 @@ func (h httpHandlerImpl) GetAllPhoto(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"data": photos})
 }
 
+// Get Photo By Id godoc
+// @Summary Get details for a given id
+// @Description Get details of photo corresponding to the input id
+// @Tags Photo
+// @Accept json
+// @Produce json
+// @Success 200 {object} entities.Photo
+// @Router /photo/{Id} [get]
+// @Security Bearer
 func (h httpHandlerImpl) GetOnePhoto(ctx *gin.Context) {
 	getId := ctx.Param("photoId")
 	id, errConv := strconv.Atoi(getId)
@@ -183,6 +211,16 @@ func (h httpHandlerImpl) GetOnePhoto(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"data one": photo})
 }
 
+// Delete Photo godoc
+// @Summary Delete photo identified by given id
+// @Description Delete the photo corresponding to the input id
+// @Tags Photo
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the photo to be deleted"
+// @Success 204 "No photo"
+// @Router /photo/{Id} [delete]
+// @Security Bearer
 func (h httpHandlerImpl) DeleteImage(ctx *gin.Context) {
 	photoId, _ := strconv.Atoi(ctx.Param("photoId"))
 
@@ -257,6 +295,16 @@ func (h httpHandlerImpl) DeleteImage(ctx *gin.Context) {
 	})
 }
 
+// Post Photo godoc
+// @Summary Post Photo for a given id
+// @Description Create Photo corresponding to the photo id in param
+// @Tags Photo
+// @Accept json
+// @Produce json
+// @Param dto.PhotoRequestBody body dto.PhotoRequestBody true "create photo"
+// @Success 200 {object} entities.Photo
+// @Router /photo [post]
+// @Security Bearer
 func (h httpHandlerImpl) UploadFile(ctx *gin.Context) {
 	userID := utils.GetUserID(ctx)
 

@@ -24,9 +24,14 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/cars": {
+        "/comment": {
             "get": {
-                "description": "Get details of all car",
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get details of all comment",
                 "consumes": [
                     "application/json"
                 ],
@@ -34,7 +39,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "cars"
+                    "Comment"
                 ],
                 "summary": "Get details",
                 "responses": {
@@ -47,7 +52,12 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Get details of car corresponding to the input id",
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create Comment corresponding to the photo id in param",
                 "consumes": [
                     "application/json"
                 ],
@@ -55,17 +65,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "cars"
+                    "Comment"
                 ],
-                "summary": "Post details for a given id",
+                "summary": "Post comment for a given id",
                 "parameters": [
                     {
-                        "description": "create car",
-                        "name": "entities.Comment",
+                        "description": "create comment",
+                        "name": "dto.CommentRequestBody",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entities.Comment"
+                            "$ref": "#/definitions/dto.CommentRequestBody"
                         }
                     }
                 ],
@@ -79,9 +89,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/cars/{Id}": {
+        "/comment/{Id}": {
             "get": {
-                "description": "Get details of car corresponding to the input id",
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get details of comment corresponding to the input id",
                 "consumes": [
                     "application/json"
                 ],
@@ -89,7 +104,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "cars"
+                    "Comment"
                 ],
                 "summary": "Get details for a given id",
                 "responses": {
@@ -102,7 +117,12 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Delete the car corresponding to the input id",
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete the comment corresponding to the input id",
                 "consumes": [
                     "application/json"
                 ],
@@ -110,13 +130,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "cars"
+                    "Comment"
                 ],
-                "summary": "Delete car identified by given id",
+                "summary": "Delete comment identified by given id",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "ID of the car to be deleted",
+                        "description": "ID of the comment to be deleted",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -129,7 +149,12 @@ const docTemplate = `{
                 }
             },
             "patch": {
-                "description": "Update details of car corresponding to the input id",
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update details of Comment corresponding to the input id",
                 "consumes": [
                     "application/json"
                 ],
@@ -137,13 +162,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "cars"
+                    "Comment"
                 ],
-                "summary": "Update car identified by given id",
+                "summary": "Update comment identified by given id",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "ID of the car to be updated",
+                        "description": "ID of the comment to be updated",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -158,9 +183,194 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/photo": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get details of all photo",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Photo"
+                ],
+                "summary": "Get details",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Photo"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create Photo corresponding to the photo id in param",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Photo"
+                ],
+                "summary": "Post Photo for a given id",
+                "parameters": [
+                    {
+                        "description": "create photo",
+                        "name": "dto.PhotoRequestBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.PhotoRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Photo"
+                        }
+                    }
+                }
+            }
+        },
+        "/photo/{Id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get details of photo corresponding to the input id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Photo"
+                ],
+                "summary": "Get details for a given id",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Photo"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete the photo corresponding to the input id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Photo"
+                ],
+                "summary": "Delete photo identified by given id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the photo to be deleted",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No photo"
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update details of Photo corresponding to the input id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Photo"
+                ],
+                "summary": "Update photo identified by given id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the photo to be updated",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Photo"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "dto.CommentRequestBody": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "photo_id": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.PhotoRequestBody": {
+            "type": "object",
+            "properties": {
+                "caption": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "integer"
+                }
+            }
+        },
         "entities.Comment": {
             "type": "object",
             "properties": {
@@ -183,6 +393,49 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        },
+        "entities.Photo": {
+            "type": "object",
+            "properties": {
+                "caption": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Comment"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "imageID": {
+                    "type": "integer"
+                },
+                "photo_url": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "integer"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "description": "Type \"Bearer\" followed by a space and JWT token.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

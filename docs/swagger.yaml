@@ -1,5 +1,21 @@
 basePath: /
 definitions:
+  dto.CommentRequestBody:
+    properties:
+      message:
+        type: string
+      photo_id:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  dto.PhotoRequestBody:
+    properties:
+      caption:
+        type: integer
+      title:
+        type: integer
+    type: object
   entities.Comment:
     properties:
       created_at:
@@ -10,6 +26,29 @@ definitions:
         type: string
       photoID:
         type: integer
+      updated_at:
+        type: string
+      userID:
+        type: integer
+    type: object
+  entities.Photo:
+    properties:
+      caption:
+        type: string
+      comments:
+        items:
+          $ref: '#/definitions/entities.Comment'
+        type: array
+      created_at:
+        type: string
+      id:
+        type: integer
+      imageID:
+        type: integer
+      photo_url:
+        type: string
+      title:
+        type: string
       updated_at:
         type: string
       userID:
@@ -28,11 +67,11 @@ info:
   title: Insta Clone Api
   version: "1.0"
 paths:
-  /cars:
+  /comment:
     get:
       consumes:
       - application/json
-      description: Get details of all car
+      description: Get details of all comment
       produces:
       - application/json
       responses:
@@ -40,20 +79,22 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/entities.Comment'
+      security:
+      - Bearer: []
       summary: Get details
       tags:
-      - cars
+      - Comment
     post:
       consumes:
       - application/json
-      description: Get details of car corresponding to the input id
+      description: Create Comment corresponding to the photo id in param
       parameters:
-      - description: create car
+      - description: create comment
         in: body
-        name: entities.Comment
+        name: dto.CommentRequestBody
         required: true
         schema:
-          $ref: '#/definitions/entities.Comment'
+          $ref: '#/definitions/dto.CommentRequestBody'
       produces:
       - application/json
       responses:
@@ -61,16 +102,18 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/entities.Comment'
-      summary: Post details for a given id
+      security:
+      - Bearer: []
+      summary: Post comment for a given id
       tags:
-      - cars
-  /cars/{Id}:
+      - Comment
+  /comment/{Id}:
     delete:
       consumes:
       - application/json
-      description: Delete the car corresponding to the input id
+      description: Delete the comment corresponding to the input id
       parameters:
-      - description: ID of the car to be deleted
+      - description: ID of the comment to be deleted
         in: path
         name: id
         required: true
@@ -80,13 +123,15 @@ paths:
       responses:
         "204":
           description: No content
-      summary: Delete car identified by given id
+      security:
+      - Bearer: []
+      summary: Delete comment identified by given id
       tags:
-      - cars
+      - Comment
     get:
       consumes:
       - application/json
-      description: Get details of car corresponding to the input id
+      description: Get details of comment corresponding to the input id
       produces:
       - application/json
       responses:
@@ -94,15 +139,17 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/entities.Comment'
+      security:
+      - Bearer: []
       summary: Get details for a given id
       tags:
-      - cars
+      - Comment
     patch:
       consumes:
       - application/json
-      description: Update details of car corresponding to the input id
+      description: Update details of Comment corresponding to the input id
       parameters:
-      - description: ID of the car to be updated
+      - description: ID of the comment to be updated
         in: path
         name: id
         required: true
@@ -114,7 +161,114 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/entities.Comment'
-      summary: Update car identified by given id
+      security:
+      - Bearer: []
+      summary: Update comment identified by given id
       tags:
-      - cars
+      - Comment
+  /photo:
+    get:
+      consumes:
+      - application/json
+      description: Get details of all photo
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Photo'
+      security:
+      - Bearer: []
+      summary: Get details
+      tags:
+      - Photo
+    post:
+      consumes:
+      - application/json
+      description: Create Photo corresponding to the photo id in param
+      parameters:
+      - description: create photo
+        in: body
+        name: dto.PhotoRequestBody
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PhotoRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Photo'
+      security:
+      - Bearer: []
+      summary: Post Photo for a given id
+      tags:
+      - Photo
+  /photo/{Id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete the photo corresponding to the input id
+      parameters:
+      - description: ID of the photo to be deleted
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No photo
+      security:
+      - Bearer: []
+      summary: Delete photo identified by given id
+      tags:
+      - Photo
+    get:
+      consumes:
+      - application/json
+      description: Get details of photo corresponding to the input id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Photo'
+      security:
+      - Bearer: []
+      summary: Get details for a given id
+      tags:
+      - Photo
+    patch:
+      consumes:
+      - application/json
+      description: Update details of Photo corresponding to the input id
+      parameters:
+      - description: ID of the photo to be updated
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Photo'
+      security:
+      - Bearer: []
+      summary: Update photo identified by given id
+      tags:
+      - Photo
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
