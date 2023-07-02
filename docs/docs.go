@@ -231,11 +231,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "create photo",
-                        "name": "dto.PhotoRequestBody",
+                        "name": "entities.Photo",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.PhotoRequestBody"
+                            "$ref": "#/definitions/entities.Photo"
                         }
                     }
                 ],
@@ -343,6 +343,40 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/social-media/{Id}": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete the social media corresponding to the input id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Social Media"
+                ],
+                "summary": "Delete social media identified by given id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the social media to be deleted",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -356,17 +390,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "user_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "dto.PhotoRequestBody": {
-            "type": "object",
-            "properties": {
-                "caption": {
-                    "type": "integer"
-                },
-                "title": {
                     "type": "integer"
                 }
             }

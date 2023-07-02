@@ -301,7 +301,7 @@ func (h httpHandlerImpl) DeleteImage(ctx *gin.Context) {
 // @Tags Photo
 // @Accept json
 // @Produce json
-// @Param dto.PhotoRequestBody body dto.PhotoRequestBody true "create photo"
+// @Param entities.Photo body entities.Photo true "create photo"
 // @Success 200 {object} entities.Photo
 // @Router /photo [post]
 // @Security Bearer
