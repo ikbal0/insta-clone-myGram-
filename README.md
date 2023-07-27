@@ -14,6 +14,9 @@ used framework :
 ### Image server
 uploaded photo are saved on image server (https://github.com/ikbal0/image-server) and image server give image url to be saved on photo table, delete photo will delete photo and image url on image server. 
 
+### Endpoint documentation
+to access endpoint documentation please run image server and this app and go to http://`yourLink`/swagger/index.html
+
 ### Validation
 1 email
 - email format validation
