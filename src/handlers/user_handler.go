@@ -19,7 +19,6 @@ var (
 // @Accept json
 // @Produce json
 // @Param dto.UserLoginRequestBody body dto.UserLoginRequestBody true "login"
-// @Success 200 {object} "token"
 // @Router /user/login [post]
 func (h httpHandlerImpl) Login(c *gin.Context) {
 	contentType := utils.GetContentType(c)

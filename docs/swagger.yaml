@@ -106,7 +106,7 @@ definitions:
       username:
         type: string
     type: object
-host: localhost:8080
+host: localhost:8082
 info:
   contact:
     email: devyad@gmail.com
@@ -407,11 +407,7 @@ paths:
           $ref: '#/definitions/dto.UserLoginRequestBody'
       produces:
       - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entities.User'
+      responses: {}
       summary: Login User
       tags:
       - User

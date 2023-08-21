@@ -19,7 +19,7 @@ import (
 // @contact.email devyad@gmail.com
 // @license.name Apace 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-// @host localhost:8080
+// @host localhost:8082
 // @BasePath /
 // @securityDefinitions.apikey Bearer
 // @in header

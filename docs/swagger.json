@@ -14,7 +14,7 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "localhost:8082",
     "basePath": "/",
     "paths": {
         "/comment": {
@@ -484,14 +484,7 @@
                         }
                     }
                 ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/entities.User"
-                        }
-                    }
-                }
+                "responses": {}
             }
         },
         "/user/register": {

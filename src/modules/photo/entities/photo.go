@@ -2,6 +2,7 @@ package entities
 
 import "insta-clone/src/modules/comment/entities"
 
+// Photo represents the model for an photo
 type Photo struct {
 	GormModel
 	Title    string `gorm:"not null" json:"title" form:"title" valid:"required~title can't empty!"`
